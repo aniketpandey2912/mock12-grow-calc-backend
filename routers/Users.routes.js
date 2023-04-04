@@ -3,6 +3,7 @@ const userRouter = express.Router();
 const bcrypt = require("bcrypt");
 const { UserModel } = require("../models/User.model");
 const jwt = require("jsonwebtoken");
+const { authenticate } = require("../middlewares/auth.middleware");
 
 userRouter.get("/", async (req, res) => {
   res.send("All users");
@@ -10,13 +11,14 @@ userRouter.get("/", async (req, res) => {
 
 userRouter.post("/register", async (req, res) => {
   let payload = req.body;
-  console.log(payload);
+  let date = new Date().toLocaleDateString();
+  let time = new Date().toLocaleTimeString();
   try {
     bcrypt.hash(payload.password, 5, async (err, hash) => {
       if (err) {
         res.send({ mssg: "Registration failed", err: err.message });
       } else {
-        let user = new UserModel({ ...payload, password: hash });
+        let user = new UserModel({ ...payload, password: hash, date, time });
         await user.save();
         res.send({ mssg: "Registration successfull" });
       }
@@ -48,6 +50,17 @@ userRouter.post("/login", async (req, res) => {
     }
   } catch (err) {
     res.send({ mssg: "Login failed", err: err.message });
+  }
+});
+
+userRouter.get("/getProfile", authenticate, async (req, res) => {
+  let { user } = req.body;
+  console.log(user);
+  try {
+    let userProfile = await UserModel.findById({ _id: user });
+    res.send({ mssg: "User details", profile: userProfile });
+  } catch (err) {
+    res.send({ mssg: "Something went wrong", err: err.message });
   }
 });
 
