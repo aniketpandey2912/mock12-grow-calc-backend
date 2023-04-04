@@ -11,8 +11,12 @@ userRouter.get("/", async (req, res) => {
 
 userRouter.post("/register", async (req, res) => {
   let payload = req.body;
-  let date = new Date().toLocaleDateString();
-  let time = new Date().toLocaleTimeString();
+  // let date = new Date().toLocaleDateString();
+  // let time = new Date().toLocaleTimeString();
+  let date = new Date().toDateString();
+  let time = new Date().toTimeString();
+
+  // console.log(date, "time", time);
   try {
     bcrypt.hash(payload.password, 5, async (err, hash) => {
       if (err) {
